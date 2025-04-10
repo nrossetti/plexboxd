@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PlexBoxd</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Popup-specific styles */
+        body {
+            min-width: 300px;
+            padding: 16px;
+        }
+        .container {
+            padding: 0;
+        }
+    </style>
+</head>
+<body class="popup-body">
+    <div class="header">
+        <h1 class="title">PlexBoxd</h1>
+        <label class="power-button">
+            <input type="checkbox" id="masterToggle">
+            <span class="power-icon"></span>
+        </label>
+    </div>
+
+    <div class="content-wrapper initial-load">
+        <div id="movie-title"></div>
+        
+        <div id="server-availability"></div>
+        
+        <div id="no-movie-info" style="display: none;">
+            <i class="fas fa-film"></i> No movie detected
+        </div>
+        
+        <div id="no-servers" style="display: none;">
+            <i class="fas fa-server"></i> No servers configured
+        </div>
+
+        <button id="settings-button">
+            <i class="fas fa-cog"></i> Settings
+        </button>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html> 
