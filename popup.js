@@ -146,31 +146,43 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const icon = document.createElement('span');
         icon.className = 'status-icon';
-        
+        if (status === 'available') {
+            icon.style.backgroundColor = '#00B020';
+        } else if (status === 'requested') {
+            icon.style.backgroundColor = '#FFA500';
+        } else if (status === 'error') {
+            icon.style.backgroundColor = '#FF4444';
+        } else {
+            icon.style.backgroundColor = '#666666';
+        }
+        statusDiv.appendChild(icon);
+
         const name = document.createElement('span');
         name.className = 'server-name';
         name.textContent = serverName;
 
+        item.appendChild(statusDiv);
+        item.appendChild(name);
+        
         switch (status) {
             case 'available':
-                statusDiv.textContent = 'Available';
-                item.classList.add('available');
                 if (plexUrl) {
                     const watchButton = document.createElement('button');
                     watchButton.className = 'request-button available';
-                    watchButton.textContent = 'Watch in Plex';
+                    watchButton.textContent = 'Watch';
                     watchButton.onclick = () => window.open(plexUrl, '_blank');
                     item.appendChild(watchButton);
                 }
                 break;
             case 'requested':
-                statusDiv.textContent = 'Requested';
-                item.classList.add('requested');
+                const requestedText = document.createElement('span');
+                requestedText.className = 'request-button';
+                requestedText.textContent = 'Requested';
+                requestedText.style.cursor = 'default';
+                item.appendChild(requestedText);
                 break;
             case 'unavailable':
-                statusDiv.textContent = 'Not Available';
-                item.classList.add('unavailable');
-                if (movieId) {  // Only show request button if we have a valid movie ID
+                if (movieId) {
                     const requestButton = document.createElement('button');
                     requestButton.className = 'request-button';
                     requestButton.textContent = 'Request';
@@ -179,13 +191,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 break;
             default:
-                statusDiv.textContent = 'Error';
-                item.classList.add('error');
+                const errorText = document.createElement('span');
+                errorText.className = 'request-button';
+                errorText.textContent = 'Error';
+                errorText.style.cursor = 'default';
+                item.appendChild(errorText);
         }
 
-        statusDiv.insertBefore(icon, statusDiv.firstChild);
-        item.insertBefore(name, item.firstChild);
-        item.insertBefore(statusDiv, name.nextSibling);
         serverAvailability.appendChild(item);
     }
 });

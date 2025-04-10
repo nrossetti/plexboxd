@@ -11,11 +11,10 @@ body {
 
 /* Popup specific */
 .popup-body {
-    width: 300px;
-    max-height: 400px;
-    overflow: hidden;
+    min-width: 280px;
+    max-width: 320px;
     padding: 16px;
-    box-sizing: border-box;
+    margin: 0;
 }
 
 /* Settings Page Styles */
@@ -424,100 +423,78 @@ body {
 
 /* Movie Info */
 #movie-title {
-    margin: 0 0 16px 0;
-    font-size: 16px;
-    font-weight: 500;
-    color: #2d3748;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-size: 1.2em;
+    font-weight: 600;
+    margin-bottom: 12px;
+    padding: 0 4px;
 }
 
 /* Server List */
 .server-availability-item {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 12px;
-    padding: 8px 0;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.server-availability-item:last-child {
-    border-bottom: none;
+    padding: 8px;
+    margin: 4px 0;
+    border-radius: 6px;
+    background: #f5f5f5;
+    transition: background-color 0.2s;
 }
 
 .status {
     display: flex;
     align-items: center;
-    gap: 8px;
-    min-width: 0;
+}
+
+.status-icon {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
 }
 
 .server-name {
     font-weight: 500;
-    color: #2d3748;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    min-width: 0;
+    padding-right: 8px;
 }
 
-.status-icon {
-    flex-shrink: 0;
-}
-
-.status-icon::before {
-    font-family: 'Font Awesome 6 Free';
-    font-weight: 900;
-    font-size: 14px;
-}
-
-.available .status-icon::before {
-    content: '\f00c';
-    color: #00B020;
-}
-
-.requested .status-icon::before {
-    content: '\f251';
-    color: #FFA000;
-}
-
-.unavailable .status-icon::before {
-    content: '\f00d';
-    color: #666;
-}
-
-.error .status-icon::before {
-    content: '\f071';
-    color: #D32F2F;
-}
-
-/* Request Button */
 .request-button {
-    padding: 6px 12px;
+    padding: 4px 8px;
     border: none;
-    border-radius: 6px;
-    background: #2196F3;
-    color: white;
-    font-size: 13px;
+    border-radius: 4px;
+    font-size: 0.9em;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: background-color 0.2s, transform 0.1s;
     white-space: nowrap;
-    flex-shrink: 0;
+    min-width: 50px;
 }
 
 .request-button:hover {
-    background: #1976D2;
     transform: translateY(-1px);
 }
 
 .request-button.available {
-    background: #00B020;
+    background-color: #00B020;
+    color: white;
 }
 
 .request-button.available:hover {
-    background: #008C1A;
+    background-color: #00C028;
+}
+
+.request-button:not(.available) {
+    background-color: #E0E0E0;
+    color: #333;
+}
+
+.request-button:not(.available):hover {
+    background-color: #D0D0D0;
 }
 
 /* Settings Button */
