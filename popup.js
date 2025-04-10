@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const movieData = result[0].result;
             if (movieData) {
-                await checkMovieAvailability(movieData);
+                await checkMovieAvailability(movieData, tab);
             }
         } else {
             serverAvailability.style.display = 'none';
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    async function checkMovieAvailability({ title, tmdbId, year }) {
+    async function checkMovieAvailability({ title, tmdbId, year }, currentTab) {
         chrome.storage.local.get(['servers', 'cacheExpiration'], async (result) => {
             const servers = result.servers || [];
             
@@ -129,7 +129,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const badgeText = hasAvailable ? '✓' : '';
             
             chrome.action.setBadgeBackgroundColor({ color: badgeColor });
-            chrome.action.setBadgeText({ text: badgeText, tabId: tab.id });
+            if (currentTab) {
+                chrome.action.setBadgeText({ text: badgeText, tabId: currentTab.id });
+            } else {
+                chrome.action.setBadgeText({ text: badgeText });
+            }
         });
     }
 
