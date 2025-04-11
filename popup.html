@@ -13,6 +13,19 @@
         .container {
             padding: 0;
         }
+        #debugInfo {
+            margin-top: 16px;
+            padding: 8px;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 200px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body class="popup-body">
@@ -40,6 +53,9 @@
         <button id="settings-button">
             <i class="fas fa-cog"></i> Settings
         </button>
+
+        <!-- Debug Info Section -->
+        <div id="debugInfo"></div>
     </div>
 
     <script src="popup.js"></script>
