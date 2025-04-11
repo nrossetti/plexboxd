@@ -23,16 +23,32 @@
 
         <div class="settings-section">
             <h2>Settings</h2>
+            
             <div class="form-group">
-                <label for="cacheExpiration">Cache Expiration (hours)</label>
-                <input type="number" id="cacheExpiration" min="1" value="24">
+                <label>Cache Expiration (hours)</label>
                 <div class="form-description">
-                    Determines how long movie availability information is stored before checking again. A longer duration reduces server load but may show outdated information.
+                    How long to cache movie information before checking again
+                </div>
+                <div class="form-row">
+                    <input type="number" id="cacheExpiration" min="1" max="72" value="24">
+                    <button id="saveCacheSettings" class="button primary">Save</button>
                 </div>
             </div>
-            <button id="saveCacheSettings" class="button button-primary">
-                <i class="fas fa-save"></i> Save Settings
-            </button>
+
+            <div class="form-group debug-option">
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <label>Debug Mode</label>
+                        <div class="form-description">
+                            Show detailed information about API requests and responses to help troubleshoot issues
+                        </div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="debugMode">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
         </div>
     </div>
 

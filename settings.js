@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const serverList = document.getElementById('serverList');
     const cacheExpirationInput = document.getElementById('cacheExpiration');
     const saveCacheSettingsButton = document.getElementById('saveCacheSettings');
+    const debugMode = document.getElementById('debugMode');
 
     // Initialize drag-and-drop
     new Sortable(serverList, {
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load initial data
     loadServers();
     loadCacheSettings();
+    loadDebugMode();
 
     // Event Listeners
     addServerButton.addEventListener('click', () => {
@@ -29,14 +31,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     saveCacheSettingsButton.addEventListener('click', () => {
         const hours = parseInt(cacheExpirationInput.value);
-        if (isNaN(hours) || hours < 1) {
-            showToast('Please enter a valid number of hours', 'error');
-            return;
+        if (hours >= 1 && hours <= 72) {
+            chrome.storage.local.set({ cacheExpiration: hours }, () => {
+                showToast('Cache settings saved');
+            });
+        } else {
+            showToast('Please enter a value between 1 and 72 hours');
         }
+    });
 
-        chrome.storage.local.set({ cacheExpiration: hours }, () => {
-            showToast('Cache settings saved successfully', 'success');
-        });
+    debugMode.addEventListener('change', () => {
+        chrome.storage.local.set({ debugMode: debugMode.checked });
     });
 
     function createServerItem(server = { name: '', url: '', apiKey: '' }, index = -1, isNew = true) {
@@ -255,6 +260,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadCacheSettings() {
         chrome.storage.local.get(['cacheExpiration'], (result) => {
             cacheExpirationInput.value = result.cacheExpiration || 24;
+        });
+    }
+
+    function loadDebugMode() {
+        chrome.storage.local.get(['debugMode'], (result) => {
+            debugMode.checked = result.debugMode || false;
         });
     }
 

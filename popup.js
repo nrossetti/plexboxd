@@ -231,14 +231,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function logDebug(message, data = null) {
-        const timestamp = new Date().toLocaleTimeString();
-        let logMessage = `[${timestamp}] ${message}\n`;
-        if (data) {
-            logMessage += JSON.stringify(data, null, 2) + '\n';
-        }
-        debugInfo.textContent += logMessage + '\n';
-        debugInfo.scrollTop = debugInfo.scrollHeight;
+        chrome.storage.local.get(['debugMode'], (result) => {
+            if (!result.debugMode) {
+                return;
+            }
+
+            const timestamp = new Date().toLocaleTimeString();
+            let logMessage = `[${timestamp}] ${message}\n`;
+            if (data) {
+                logMessage += JSON.stringify(data, null, 2) + '\n';
+            }
+            debugInfo.textContent += logMessage + '\n';
+            debugInfo.scrollTop = debugInfo.scrollHeight;
+        });
     }
+
+    // Update debug panel visibility based on debug mode
+    function updateDebugVisibility() {
+        chrome.storage.local.get(['debugMode'], (result) => {
+            debugInfo.style.display = result.debugMode ? 'block' : 'none';
+            if (!result.debugMode) {
+                debugInfo.textContent = ''; // Clear debug info when disabled
+            }
+        });
+    }
+
+    // Call this when popup opens and when debug mode changes
+    updateDebugVisibility();
+
+    // Listen for debug mode changes
+    chrome.storage.onChanged.addListener((changes) => {
+        if (changes.debugMode) {
+            updateDebugVisibility();
+        }
+    });
 
     async function searchOmbi(server, query, year) {
         const baseUrl = formatApiUrl(server.url);
@@ -342,31 +368,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                             }
                         });
                         
-                        if (!availabilityResponse.ok) {
-                            const errorText = await availabilityResponse.text();
-                            logDebug(`Availability check failed: ${availabilityResponse.status} ${availabilityResponse.statusText}`);
-                            logDebug(`Error response: ${errorText}`);
-                            // Don't throw, just use default values
-                            searchResult.available = false;
+                        if (!availabilityResponse.ok || availabilityResponse.status === 204) {
+                            logDebug(`Availability check returned ${availabilityResponse.status}`);
+                            // Keep existing plexUrl if we have it
+                            searchResult.plexUrl = searchResult.plexUrl || null;
+                            searchResult.available = searchResult.available || false;
                             searchResult.requested = existingRequest ? true : false;
-                            searchResult.approved = false;
-                            searchResult.plexUrl = null;
                         } else {
                             try {
                                 const availabilityData = await availabilityResponse.json();
                                 logDebug('Availability data:', availabilityData);
                                 
-                                searchResult.available = availabilityData.available || false;
+                                // Keep plexUrl from either source
+                                searchResult.plexUrl = searchResult.plexUrl || availabilityData.plexUrl || null;
+                                searchResult.available = availabilityData.available || searchResult.available || false;
                                 searchResult.requested = existingRequest ? true : (availabilityData.requested || false);
-                                searchResult.approved = availabilityData.approved || false;
-                                searchResult.plexUrl = availabilityData.plexUrl || null;
                             } catch (jsonError) {
                                 logDebug('Error parsing availability JSON:', jsonError);
-                                // Use default values on parse error
-                                searchResult.available = false;
+                                // Keep existing plexUrl if we have it
+                                searchResult.plexUrl = searchResult.plexUrl || null;
+                                searchResult.available = searchResult.available || false;
                                 searchResult.requested = existingRequest ? true : false;
-                                searchResult.approved = false;
-                                searchResult.plexUrl = null;
                             }
                         }
                     } catch (availabilityError) {
@@ -378,7 +400,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         // Don't throw, just use default values
                         searchResult.available = false;
                         searchResult.requested = existingRequest ? true : false;
-                        searchResult.approved = false;
                         searchResult.plexUrl = null;
                     }
                     
@@ -460,11 +481,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     function determineStatus(result) {
         logDebug('Determining status for:', result);
         let status;
-        if (result.plexUrl || result.available) {
+        // Check if it's available in Plex
+        if (result.available) {
             status = 'available';
-        } else if (result.requested || result.approved) {
+        }
+        // If not available, check if it's been requested
+        else if (result.requested) {
             status = 'requested';
-        } else {
+        }
+        // Otherwise it's unavailable
+        else {
             status = 'unavailable';
         }
         logDebug(`Status determined: ${status}`);
