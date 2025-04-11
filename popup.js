@@ -58,6 +58,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         chrome.runtime.openOptionsPage();
     });
 
+    // Theme handling
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    // Load saved theme or detect system preference
+    chrome.storage.local.get(['theme'], (result) => {
+        const savedTheme = result.theme || 'system';
+        applyTheme(savedTheme);
+    });
+
+    // Handle system theme changes
+    prefersDark.addEventListener('change', () => {
+        chrome.storage.local.get(['theme'], (result) => {
+            const currentTheme = result.theme || 'system';
+            if (currentTheme === 'system') {
+                applyTheme('system');
+            }
+        });
+    });
+
+    function applyTheme(theme) {
+        if (theme === 'system') {
+            if (prefersDark.matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        } else {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+    }
+
     async function checkCurrentTab() {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         if (tab?.url?.includes('letterboxd.com/film/')) {

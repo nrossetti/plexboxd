@@ -4,6 +4,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const cacheExpirationInput = document.getElementById('cacheExpiration');
     const saveCacheSettingsButton = document.getElementById('saveCacheSettings');
 
+    // Theme handling
+    const themeSelect = document.getElementById('theme-select');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+    // Load saved theme or detect system preference
+    chrome.storage.local.get(['theme'], (result) => {
+        const savedTheme = result.theme || 'system';
+        themeSelect.value = savedTheme;
+        applyTheme(savedTheme);
+    });
+
+    // Handle theme changes
+    themeSelect.addEventListener('change', () => {
+        const newTheme = themeSelect.value;
+        chrome.storage.local.set({ theme: newTheme });
+        applyTheme(newTheme);
+    });
+
+    // Handle system theme changes
+    prefersDark.addEventListener('change', () => {
+        const currentTheme = themeSelect.value;
+        if (currentTheme === 'system') {
+            applyTheme('system');
+        }
+    });
+
+    function applyTheme(theme) {
+        if (theme === 'system') {
+            if (prefersDark.matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        } else {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+    }
+
     // Initialize drag-and-drop
     new Sortable(serverList, {
         animation: 150,

@@ -7,32 +7,41 @@
 </head>
 <body>
     <div class="settings-container">
-        <h1 class="settings-title">PlexBoxd Settings</h1>
+        <h1 class="settings-title">Settings</h1>
 
         <div class="settings-section">
-            <div class="section-header">
-                <h2>Configured Servers</h2>
-                <button id="addServer" class="button button-primary">
-                    <i class="fas fa-plus"></i> Add Server
-                </button>
-            </div>
-            <div id="serverList" class="server-list">
-                <!-- Server items will be added here dynamically -->
+            <h2>Appearance</h2>
+            <div class="theme-toggle">
+                <label for="theme-select">Theme:</label>
+                <select id="theme-select">
+                    <option value="system">System Default</option>
+                    <option value="dark">Dark</option>
+                    <option value="light">Light</option>
+                </select>
             </div>
         </div>
 
         <div class="settings-section">
-            <h2>Settings</h2>
-            <div class="form-group">
-                <label for="cacheExpiration">Cache Expiration (hours)</label>
-                <input type="number" id="cacheExpiration" min="1" value="24">
-                <div class="form-description">
-                    Determines how long movie availability information is stored before checking again. A longer duration reduces server load but may show outdated information.
-                </div>
+            <div class="section-header">
+                <h2>Configured Servers</h2>
+                <button id="add-server" class="button button-primary">
+                    <i class="fas fa-plus"></i>
+                    Add Server
+                </button>
             </div>
-            <button id="saveCacheSettings" class="button button-primary">
-                <i class="fas fa-save"></i> Save Settings
-            </button>
+            <div id="server-list" class="server-list"></div>
+        </div>
+
+        <div class="settings-section">
+            <h2>Cache Settings</h2>
+            <div class="form-group">
+                <label for="cache-expiration">Cache Expiration (hours)</label>
+                <input type="number" id="cache-expiration" min="1" max="168" value="24">
+                <div class="form-description">How long to cache movie availability results. Default is 24 hours.</div>
+            </div>
+            <div class="form-actions">
+                <button id="save-cache" class="button button-primary">Save Cache Settings</button>
+            </div>
         </div>
     </div>
 
