@@ -80,6 +80,15 @@ body {
     margin-bottom: 0.5rem;
 }
 
+input[type="text"],
+input[type="url"],
+input[type="password"] {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding-right: 40px; /* to prevent icon overlap */
+}
+
 .input-with-button input {
     flex: 1;
     padding: 0.5rem;
@@ -258,6 +267,10 @@ input:checked + .toggle-slider:before {
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+.settings-container .server-fields,
+.settings-container .field-group {
+  max-width: calc(100% - 40px);
 }
 
 .settings-container .server-actions {
@@ -880,3 +893,38 @@ input:checked + .toggle-slider:before {
 .checkbox-label input[type="checkbox"] {
     margin: 0;
 }
+
+.api-key-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .api-key-wrapper input {
+    flex: 1;
+    padding-right: 32px;
+    box-sizing: border-box;
+  }
+  
+  .toggle-password {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    height: 100%;
+  }
+  
+  .toggle-password:hover {
+    color: #3182ce;
+  }
+
+  .server-item {
+    transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
+    overflow: hidden;
+  }
