@@ -91,7 +91,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             movieTitle.textContent = title || 'Unknown Movie';
             serverAvailability.innerHTML = '';
 
-            let hasAvailable = false;
             const cacheExpiration = (result.cacheExpiration || 24) * 60 * 60 * 1000;
 
             for (const server of servers) {
@@ -101,7 +100,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const cachedResult = await checkCache(cacheKey, cacheExpiration);
                 if (cachedResult) {
                     displayServerResult(server.name, cachedResult.status, cachedResult.id, cachedResult.plexUrl);
-                    if (cachedResult.status === 'available') hasAvailable = true;
                     continue;
                 }
 
@@ -111,7 +109,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (searchResult) {
                         const status = determineStatus(searchResult);
                         displayServerResult(server.name, status, searchResult.id, searchResult.plexUrl);
-                        if (status === 'available') hasAvailable = true;
                         cacheResult(cacheKey, { 
                             status, 
                             id: searchResult.id,
@@ -122,17 +119,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     console.error(`PlexBoxd: Error checking ${server.name}:`, error);
                     displayServerResult(server.name, 'error');
                 }
-            }
-
-            // Update extension icon
-            const badgeColor = hasAvailable ? '#00B020' : '#666666';
-            const badgeText = hasAvailable ? '✓' : '';
-            
-            chrome.action.setBadgeBackgroundColor({ color: badgeColor });
-            if (currentTab) {
-                chrome.action.setBadgeText({ text: badgeText, tabId: currentTab.id });
-            } else {
-                chrome.action.setBadgeText({ text: badgeText });
             }
         });
     }
@@ -175,10 +161,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 break;
             case 'requested':
-                const requestedText = document.createElement('span');
+                const requestedText = document.createElement('button');
                 requestedText.className = 'request-button';
                 requestedText.textContent = 'Requested';
-                requestedText.style.cursor = 'default';
+                requestedText.disabled = true;
                 item.appendChild(requestedText);
                 break;
             case 'unavailable':
@@ -191,11 +177,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 break;
             default:
-                const errorText = document.createElement('span');
-                errorText.className = 'request-button';
-                errorText.textContent = 'Error';
-                errorText.style.cursor = 'default';
-                item.appendChild(errorText);
+                const errorButton = document.createElement('button');
+                errorButton.className = 'request-button';
+                errorButton.textContent = 'Error';
+                errorButton.disabled = true;
+                item.appendChild(errorButton);
         }
 
         serverAvailability.appendChild(item);
