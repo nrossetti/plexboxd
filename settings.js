@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const dragHandle = document.createElement('div');
         dragHandle.className = 'drag-handle';
         dragHandle.title = 'Drag to reorder';
-        dragHandle.innerHTML = '<i class="fas fa-grip-dots-vertical"></i>';
+        dragHandle.innerHTML = '<i class="fas fa-grip-vertical"></i>';
 
         const serverContent = document.createElement('div');
         serverContent.className = 'server-content' + (isNew ? '' : ' view-mode');
