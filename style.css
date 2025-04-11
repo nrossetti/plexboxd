@@ -9,7 +9,6 @@ body {
     background: white;
 }
 
-/* Popup specific */
 .popup-body {
     min-width: 280px;
     max-width: 320px;
@@ -18,11 +17,28 @@ body {
     background: #f8fafc;
 }
 
-/* Settings Page Styles */
 .settings-container {
     max-width: 800px;
     margin: 2rem auto;
     padding: 0 1rem;
+}
+
+.settings-container .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.settings-container .field-group input {
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+.settings-container .server-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2d3748;
+    padding-top: 4px;
 }
 
 .settings-section {
@@ -78,7 +94,6 @@ body {
     box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
-/* Toggle Switch */
 .toggle-row {
     display: flex;
     justify-content: space-between;
@@ -139,7 +154,6 @@ input:checked + .toggle-slider:before {
     transform: translateX(24px);
 }
 
-/* Button Styles */
 .button {
     padding: 0.5rem 1rem;
     border: none;
@@ -170,7 +184,6 @@ input:checked + .toggle-slider:before {
     font-size: 0.9em;
 }
 
-/* Save button specific styles */
 .save-cache-button {
     min-width: 100px;
     justify-content: center;
@@ -180,7 +193,6 @@ input:checked + .toggle-slider:before {
     opacity: 0.7;
 }
 
-/* Toast Message */
 .toast {
     position: fixed;
     bottom: 20px;
@@ -205,7 +217,6 @@ input:checked + .toggle-slider:before {
     }
 }
 
-/* Server List Styles */
 .server-list {
     margin-bottom: 1rem;
 }
@@ -237,11 +248,23 @@ input:checked + .toggle-slider:before {
     color: #7f8c8d;
 }
 
-.server-content {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    flex: 1;
+.settings-container .server-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.settings-container .server-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.settings-container .server-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 12px;
 }
 
 .server-content input {
@@ -280,7 +303,6 @@ input:checked + .toggle-slider:before {
     color: #e74c3c;
 }
 
-/* Empty State */
 .server-list:empty::after {
     content: "No servers configured";
     display: block;
@@ -292,7 +314,6 @@ input:checked + .toggle-slider:before {
     font-style: italic;
 }
 
-/* Section Header */
 .section-header {
     display: flex;
     justify-content: space-between;
@@ -304,7 +325,6 @@ input:checked + .toggle-slider:before {
     margin: 0;
 }
 
-/* Server List */
 .server-list {
     display: flex;
     flex-direction: column;
@@ -322,7 +342,10 @@ input:checked + .toggle-slider:before {
     border: 1px solid #e2e8f0;
     transition: all 0.2s;
 }
-
+.server-item {
+    transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
+    overflow: hidden;
+}
 .server-item:hover {
     border-color: #3182ce;
     box-shadow: 0 2px 4px rgba(49, 130, 206, 0.1);
@@ -337,7 +360,15 @@ input:checked + .toggle-slider:before {
     background: #ebf8ff;
     border-color: #3182ce;
 }
+.server-item:not(.editing) {
+    max-height: 60px;
+    padding: 12px 16px;
+}
 
+.server-item.editing {
+    max-height: 500px; 
+    padding: 16px;
+}
 .server-name {
     font-weight: 500;
     color: #2d3748;
@@ -376,7 +407,6 @@ input:checked + .toggle-slider:before {
     color: #3182ce;
 }
 
-/* Buttons */
 .button {
     padding: 10px 16px;
     border: none;
@@ -430,7 +460,6 @@ input:checked + .toggle-slider:before {
     font-size: 16px;
 }
 
-/* Form Groups */
 .form-group {
     margin-bottom: 24px;
     padding-bottom: 24px;
@@ -450,7 +479,6 @@ input:checked + .toggle-slider:before {
     line-height: 1.5;
 }
 
-/* Toggle Switch */
 .toggle-row {
     display: flex;
     justify-content: space-between;
@@ -508,7 +536,6 @@ input:checked + .toggle-slider:before {
     transform: translateX(24px);
 }
 
-/* Save Button Styles */
 .form-row {
     display: flex;
     gap: 12px;
@@ -551,7 +578,6 @@ input:checked + .toggle-slider:before {
     cursor: not-allowed;
 }
 
-/* Saving State */
 .button.primary.saving {
     position: relative;
     padding-right: 32px;
@@ -577,7 +603,6 @@ input:checked + .toggle-slider:before {
     to { transform: translateY(-50%) rotate(360deg); }
 }
 
-/* Empty State */
 .empty-message {
     text-align: center;
     color: #718096;
@@ -588,7 +613,6 @@ input:checked + .toggle-slider:before {
     border: 1px dashed #e2e8f0;
 }
 
-/* Toast Messages */
 .toast {
     position: fixed;
     bottom: 24px;
@@ -618,7 +642,6 @@ input:checked + .toggle-slider:before {
     background: #f56565;
 }
 
-/* Header */
 .header {
     display: flex;
     align-items: center;
@@ -640,7 +663,6 @@ input:checked + .toggle-slider:before {
     white-space: nowrap;
 }
 
-/* Content Container */
 .content-wrapper {
     max-height: 500px;
     opacity: 1;
@@ -655,12 +677,10 @@ input:checked + .toggle-slider:before {
     visibility: hidden;
 }
 
-/* Add initial state class */
 .content-wrapper.initial-load {
     transition: none;
 }
 
-/* Power Button */
 .power-button {
     position: relative;
     display: inline-block;
@@ -704,7 +724,6 @@ input:checked + .toggle-slider:before {
     color: white;
 }
 
-/* Movie Info */
 #movie-title {
     font-size: 1.2em;
     font-weight: 600;
@@ -712,7 +731,6 @@ input:checked + .toggle-slider:before {
     padding: 0 4px;
 }
 
-/* Server List */
 .server-availability-item {
     display: grid;
     grid-template-columns: auto 1fr auto;
@@ -805,7 +823,6 @@ input:checked + .toggle-slider:before {
     background-color: #FF4444;
 }
 
-/* Settings Button */
 #settings-button {
     width: 100%;
     margin-top: 16px;
@@ -834,7 +851,6 @@ input:checked + .toggle-slider:before {
     font-size: 14px;
 }
 
-/* Messages */
 #no-movie-info, #no-servers {
     text-align: center;
     color: #64748b;
@@ -846,7 +862,6 @@ input:checked + .toggle-slider:before {
     margin: 8px 0;
 }
 
-/* Debug Options */
 .debug-option {
     margin-top: 20px;
     padding-top: 15px;
