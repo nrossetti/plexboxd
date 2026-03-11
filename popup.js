@@ -139,24 +139,13 @@ function extractMovieInfoFromPage() {
         }
     }
 
-    // Try multiple selectors for the year
-    const yearSelectors = [
-        'small.number',
-        '.film-header-lockup .number',
-        '.number'
-    ];
-    
+    // Year: Letterboxd puts it in <span class="releasedate"><a>2026</a></span>
     let year = null;
-    for (const selector of yearSelectors) {
-        const element = document.querySelector(selector);
-        if (element) {
-            const yearText = element.textContent.trim();
-            const yearMatch = yearText.match(/\d{4}/);
-            if (yearMatch) {
-                year = parseInt(yearMatch[0]);
-                break;
-            }
-        }
+    const yearEl = document.querySelector('span.releasedate a') ||
+                   document.querySelector('.film-header-lockup .number');
+    if (yearEl) {
+        const yearMatch = yearEl.textContent.trim().match(/\d{4}/);
+        if (yearMatch) year = parseInt(yearMatch[0]);
     }
 
     // Try to find TMDb ID from external links
@@ -186,15 +175,106 @@ function extractMovieInfoFromPage() {
         }
     }
 
+    // Extract rating, genres, poster and TMDB ID from JSON-LD
+    // Letterboxd wraps JSON-LD in CDATA comments — strip them before parsing
+    let letterboxdRating = null;
+    let genres = [];
+    let posterUrl = null;
+    const ldScripts = document.querySelectorAll('script[type="application/ld+json"]');
+    ldScripts.forEach(script => {
+        try {
+            const raw = script.textContent
+                .replace(/\/\*\s*<!\[CDATA\[[\s\S]*?\*\//g, '')
+                .replace(/\/\*\s*\]\]>[\s\S]*?\*\//g, '')
+                .trim();
+            const data = JSON.parse(raw);
+            if (data && data['@type'] === 'Movie') {
+                if (data.aggregateRating && data.aggregateRating.ratingValue) {
+                    letterboxdRating = parseFloat(data.aggregateRating.ratingValue);
+                }
+                if (data.genre) {
+                    genres = Array.isArray(data.genre) ? data.genre : [data.genre];
+                }
+                if (data.image) {
+                    posterUrl = data.image;
+                }
+                if (!tmdbId && Array.isArray(data.sameAs)) {
+                    for (const url of data.sameAs) {
+                        const m = url.match(/themoviedb\.org\/movie\/(\d+)/);
+                        if (m) { tmdbId = m[1]; break; }
+                    }
+                }
+            }
+        } catch (e) { /* ignore parse errors */ }
+    });
+
+    // Extract user's rating if logged in (Letterboxd stores it as data-rating-value)
+    let userRating = null;
+    const yourRatingEl = document.querySelector('[data-rating-value]') ||
+                         document.querySelector('.your-rating [data-value]');
+    if (yourRatingEl) {
+        const val = parseFloat(yourRatingEl.getAttribute('data-rating-value') ||
+                               yourRatingEl.getAttribute('data-value') || '0');
+        if (val > 0) userRating = val; // Already on 0.5–5 scale on Letterboxd
+    }
+
+    // Watched status (present if user has logged a watch)
+    const userWatched = !!document.querySelector('.icon-watched.active, .view-date, [data-film-watch-date]');
+
     // Create the movie info object
     const movieInfo = {
         title: title,
         year: year,
-        tmdbId: tmdbId
+        tmdbId: tmdbId,
+        posterUrl: posterUrl,
+        letterboxdRating: letterboxdRating,
+        genres: genres,
+        userRating: userRating,
+        userWatched: userWatched
     };
 
     console.log('Extracted movie information:', movieInfo);
     return movieInfo;
+}
+
+// ── Accent colour helpers ──────────────────────────────────────────────────
+
+function generateAccentColor(title) {
+    let hash = 0;
+    for (let i = 0; i < title.length; i++) {
+        hash = title.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    // Full 360° hue range for maximum variance; fixed saturation/lightness
+    // that reads well on the dark background
+    const hue = Math.abs(hash) % 360;
+    return `hsl(${hue}, 72%, 58%)`;
+}
+
+function applyAccentColor(color) {
+    document.body.style.setProperty('--accent', color);
+    const dot = document.getElementById('popup-accent-dot');
+    if (dot) dot.style.background = color;
+}
+
+function renderStars(rating, color) {
+    // rating is 0.5–5 (Letterboxd half-star scale) — used for "Your Rating"
+    const full = Math.floor(rating);
+    const half = (rating % 1) >= 0.5 ? 1 : 0;
+    const empty = 5 - full - half;
+    const star = (opacity) => `<span style="color:${color};opacity:${opacity}">&#9733;</span>`;
+    return star(1).repeat(full) + (half ? star(0.55) : '') + star(0.2).repeat(empty);
+}
+
+function renderRatingStars(rating) {
+    // rating is 0–5 Letterboxd community scale; uses Font Awesome icons
+    const full  = Math.floor(rating);
+    const half  = (rating % 1) >= 0.5 ? 1 : 0;
+    const empty = 5 - full - half;
+    let html = '';
+    for (let i = 0; i < full;  i++) html += `<i class="fas fa-star rating-star"></i>`;
+    if (half)                        html += `<i class="fas fa-star-half-alt rating-star"></i>`;
+    for (let i = 0; i < empty; i++) html += `<i class="fas fa-star rating-star rating-star-empty"></i>`;
+    return html;
 }
 
 // Initialize the popup when the DOM is loaded
@@ -206,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Setup debug toggle button
     const debugToggle = document.getElementById('debug-toggle');
     const debugInfo = document.getElementById('debug-info');
-    
+
     if (debugToggle && debugInfo) {
         debugToggle.addEventListener('click', () => {
             if (debugInfo.style.display === 'none') {
@@ -216,6 +296,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 debugInfo.style.display = 'none';
                 debugToggle.textContent = 'Show Debug Info';
             }
+        });
+    }
+
+    // Theme toggle (light / dark)
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        // Apply saved theme immediately to avoid flash
+        chrome.storage.local.get(['popupTheme'], ({ popupTheme }) => {
+            if (popupTheme === 'light') {
+                document.body.classList.add('light');
+                themeToggle.querySelector('i').className = 'fas fa-moon';
+            }
+        });
+
+        themeToggle.addEventListener('click', () => {
+            const isLight = document.body.classList.toggle('light');
+            themeToggle.querySelector('i').className = isLight ? 'fas fa-moon' : 'fas fa-sun';
+            chrome.storage.local.set({ popupTheme: isLight ? 'light' : 'dark' });
         });
     }
 });
@@ -375,19 +473,76 @@ function displayResult(movieInfo, availability) {
     try {
         // Hide loading
         displayLoading(false);
-        
+
+        // Show movie content panel and apply accent colour
+        const movieContent = document.getElementById('movie-content');
+        if (movieContent) movieContent.style.display = 'block';
+        if (movieInfo.title) applyAccentColor(generateAccentColor(movieInfo.title));
+
+        // Poster image
+        if (movieInfo.posterUrl) {
+            const posterImg = document.getElementById('movie-poster-img');
+            const posterPlaceholder = document.getElementById('poster-placeholder');
+            if (posterImg) {
+                posterImg.src = movieInfo.posterUrl;
+                posterImg.style.display = 'block';
+                if (posterPlaceholder) posterPlaceholder.style.display = 'none';
+            }
+        }
+
         // Get references to the DOM elements
         const movieTitleElement = document.getElementById('movie-title');
         const serverAvailabilityElement = document.getElementById('server-availability');
         const actionsElement = document.getElementById('actions');
-        
-        // Update movie title if we have it
+
+        // Title (year lives in the meta grid, not the heading)
         if (movieTitleElement && movieInfo.title) {
             movieTitleElement.textContent = movieInfo.title;
-            if (movieInfo.year) {
-                movieTitleElement.textContent += ` (${movieInfo.year})`;
-            }
             movieTitleElement.style.display = 'block';
+        }
+
+        // Year
+        const yearEl = document.getElementById('popup-year');
+        if (yearEl && movieInfo.year) yearEl.textContent = movieInfo.year;
+
+        // Watched status — only show the cell when we actually detected a watch
+        if (movieInfo.userWatched) {
+            const watchedCell = document.getElementById('popup-watched-cell');
+            const watchedEl   = document.getElementById('popup-watched');
+            if (watchedCell) watchedCell.style.display = 'flex';
+            if (watchedEl)   watchedEl.textContent = '✓ Watched';
+        }
+
+        // Letterboxd rating — stars + numeric value
+        if (movieInfo.letterboxdRating) {
+            const ratingSection = document.getElementById('popup-rating-section');
+            const ratingStars   = document.getElementById('popup-rating-stars');
+            const ratingValue   = document.getElementById('popup-rating-value');
+            if (ratingSection) {
+                ratingSection.style.display = 'block';
+                if (ratingStars) ratingStars.innerHTML = renderRatingStars(movieInfo.letterboxdRating);
+                if (ratingValue) ratingValue.textContent = movieInfo.letterboxdRating.toFixed(1);
+            }
+        }
+
+        // User star rating
+        if (movieInfo.userRating) {
+            const userRatingDiv = document.getElementById('popup-user-rating');
+            const starsDiv      = document.getElementById('popup-stars');
+            if (userRatingDiv && starsDiv) {
+                userRatingDiv.style.display = 'block';
+                starsDiv.innerHTML = renderStars(movieInfo.userRating, 'var(--accent)');
+            }
+        }
+
+        // Genre tags
+        if (movieInfo.genres && movieInfo.genres.length > 0) {
+            const genresDiv = document.getElementById('popup-genres');
+            if (genresDiv) {
+                genresDiv.innerHTML = movieInfo.genres.slice(0, 4).map(g =>
+                    `<span class="popup-genre-tag" style="background:var(--accent,#10b981)22;border:1px solid var(--accent,#10b981)55;color:var(--accent,#10b981)">${g}</span>`
+                ).join('');
+            }
         }
         
         // Check if we have an error in the availability result
@@ -397,88 +552,66 @@ function displayResult(movieInfo, availability) {
             return;
         }
         
-        // Update the server availability information
+        // Status badge
         if (serverAvailabilityElement) {
-            let statusClass = 'unknown';
-            let statusIcon = 'question-circle';
-            let statusText = 'Unknown';
-            
+            let circleColor, icon, statusText, statusSubtext;
+
             if (availability.available) {
-                statusClass = 'available';
-                statusIcon = 'check-circle';
-                statusText = 'Available on Plex';
-            } else if (availability.approved) {
-                statusClass = 'requested';
-                statusIcon = 'clock';
-                statusText = 'Processing Request';
-            } else if (availability.requested) {
-                statusClass = 'requested';
-                statusIcon = 'clock';
-                statusText = 'Requested';
+                circleColor  = 'var(--accent, #10b981)';
+                icon         = '<i class="fas fa-check"></i>';
+                statusText   = 'Available on Plex';
+                statusSubtext = 'Available to watch';
+            } else if (availability.approved || availability.requested) {
+                circleColor  = '#f59e0b';
+                icon         = '<i class="fas fa-clock"></i>';
+                statusText   = availability.approved ? 'Processing Request' : 'Requested';
+                statusSubtext = 'Request pending processing';
             } else if (availability.denied) {
-                statusClass = 'unavailable';
-                statusIcon = 'times-circle';
-                statusText = 'Request Denied';
+                circleColor  = '#6b7280';
+                icon         = '<i class="fas fa-ban"></i>';
+                statusText   = 'Request Denied';
+                statusSubtext = 'Request was not approved';
             } else {
-                statusClass = 'unavailable';
-                statusIcon = 'times-circle';
-                statusText = 'Not Available';
+                circleColor  = '#ef4444';
+                icon         = '<i class="fas fa-times"></i>';
+                statusText   = 'Not Available';
+                statusSubtext = 'Not currently available';
             }
-            
+
             serverAvailabilityElement.innerHTML = `
-                <div class="server-item">
-                    <div class="server-status">
-                        <span class="status-icon ${statusClass}">
-                            <i class="fas fa-${statusIcon}"></i>
-                        </span>
-                        <span class="status-text">${statusText}</span>
+                <div class="popup-status-inner">
+                    <div class="popup-status-circle" style="background:${circleColor}">${icon}</div>
+                    <div>
+                        <p class="popup-status-title">${statusText}</p>
+                        <p class="popup-status-sub">${statusSubtext}</p>
                     </div>
                 </div>
             `;
-            // Remove any accidental duplicate icons (defensive, in case of re-render)
-            const icons = serverAvailabilityElement.querySelectorAll('.status-icon.unavailable i.fas.fa-times-circle');
-            if (icons.length > 1) {
-                for (let i = 1; i < icons.length; i++) {
-                    icons[i].remove();
-                }
-            }
             serverAvailabilityElement.style.display = 'block';
         }
         
-        // Update the action buttons
+        // Action buttons
         if (actionsElement) {
             let action = '';
-            
+
             if (availability.available) {
-                // Show 'Watch on Plex' button if available
-                action = `
-                    <button class="action-button watch-button">
-                        <i class="fas fa-play"></i> Watch on Plex
-                    </button>
-                `;
+                action = `<button class="action-button watch-button popup-action-btn popup-action-primary">
+                    <i class="fas fa-play"></i> Watch on Plex
+                </button>`;
             } else if (availability.requested || availability.approved) {
-                // Show 'Requested' button if already requested
-                action = `
-                    <button class="action-button requested-button" disabled>
-                        <i class="fas fa-check"></i> Already Requested
-                    </button>
-                `;
+                action = `<button class="action-button requested-button popup-action-btn popup-action-outline" disabled>
+                    <i class="fas fa-check"></i> Already Requested
+                </button>`;
             } else if (availability.denied) {
-                // Show 'Request Denied' button if denied
-                action = `
-                    <button class="action-button denied-button" disabled>
-                        <i class="fas fa-ban"></i> Request Denied
-                    </button>
-                `;
+                action = `<button class="action-button denied-button popup-action-btn popup-action-outline" disabled style="border-color:#6b7280;color:#6b7280">
+                    <i class="fas fa-ban"></i> Request Denied
+                </button>`;
             } else {
-                // Show 'Request' button if not available and not requested
-                action = `
-                    <button class="action-button request-button">
-                        <i class="fas fa-plus"></i> Request
-                    </button>
-                `;
+                action = `<button class="action-button request-button popup-action-btn popup-action-primary">
+                    <i class="fas fa-plus"></i> Request
+                </button>`;
             }
-            
+
             actionsElement.innerHTML = action;
             actionsElement.style.display = 'block';
             
@@ -542,18 +675,19 @@ function displayResult(movieInfo, availability) {
                         
                         console.log('Request result:', result);
                         // Update the UI to show requested state
-                        requestButton.classList.remove('request-button');
-                        requestButton.classList.add('requested-button');
+                        requestButton.classList.remove('request-button', 'popup-action-primary');
+                        requestButton.classList.add('requested-button', 'popup-action-outline');
                         requestButton.innerHTML = '<i class="fas fa-check"></i> Request Successful';
-                        // Update the server status
+                        // Update the status badge
                         if (serverAvailabilityElement) {
                             serverAvailabilityElement.innerHTML = `
-                                <div class="server-item">
-                                    <div class="server-status">
-                                        <span class="status-icon requested">
-                                            <i class="fas fa-clock"></i>
-                                        </span>
-                                        <span class="status-text">Requested</span>
+                                <div class="popup-status-inner">
+                                    <div class="popup-status-circle" style="background:#f59e0b">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div>
+                                        <p class="popup-status-title">Requested</p>
+                                        <p class="popup-status-sub">Request pending processing</p>
                                     </div>
                                 </div>
                             `;

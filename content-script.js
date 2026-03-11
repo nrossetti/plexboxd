@@ -60,14 +60,12 @@ function extractMovieInfo() {
         
         // Extract year if we didn't get it from the title
         if (!year) {
-            const yearElement = document.querySelector('.film-header-lockup .number');
-            if (yearElement) {
-                const yearText = yearElement.textContent.trim();
-                console.log('Year text from year element:', yearText);
-                
-                if (/^\d{4}$/.test(yearText)) {
-                    year = parseInt(yearText);
-                }
+            // Primary: <span class="releasedate"><a>2026</a></span>
+            const releaseDateEl = document.querySelector('span.releasedate a') ||
+                                  document.querySelector('.film-header-lockup .number');
+            if (releaseDateEl) {
+                const yearText = releaseDateEl.textContent.trim();
+                if (/^\d{4}$/.test(yearText)) year = parseInt(yearText);
             }
         }
         
@@ -75,12 +73,14 @@ function extractMovieInfo() {
         const scripts = document.querySelectorAll('script[type="application/ld+json"]');
         scripts.forEach(script => {
             try {
-                const data = JSON.parse(script.textContent);
+                // Letterboxd wraps JSON-LD in CDATA comments; strip them before parsing
+                const raw = script.textContent.replace(/\/\*\s*<!\[CDATA\[[\s\S]*?\*\//g, '')
+                                              .replace(/\/\*\s*\]\]>[\s\S]*?\*\//g, '')
+                                              .trim();
+                const data = JSON.parse(raw);
                 if (data && data.sameAs) {
-                    // Check if any of the sameAs URLs contains TMDB
                     if (Array.isArray(data.sameAs)) {
                         for (const url of data.sameAs) {
-                            // Extract TMDB ID from URL
                             const tmdbMatch = url.match(/themoviedb\.org\/movie\/(\d+)/);
                             if (tmdbMatch && tmdbMatch[1]) {
                                 tmdbId = tmdbMatch[1];
