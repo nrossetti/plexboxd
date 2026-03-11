@@ -1,13 +1,16 @@
 # PlexBoxd
 
-**PlexBoxd** is a Chrome extension that makes it effortless to check if a movie you're browsing on [Letterboxd](https://letterboxd.com) is available on any of your Plex servers (via Overseerr) — and lets you request it with a single click if it's not.
+**PlexBoxd** is a Chrome extension that makes it effortless to check if a movie you're browsing on [Letterboxd](https://letterboxd.com) is available via your Plex server (through Overseerr or Ombi) — and lets you request it with a single click if it's not.
 
 ## 🚀 Features
 
 - 🔍 Detects when you're viewing a film on Letterboxd
-- ⚡ Instantly checks all your configured Overseerr servers
-- 🎬 One-click movie requests when content isn’t available
-- 🖥️ Works with multiple servers (great for shared libraries)
+- ⚡ Instantly checks availability via Overseerr or Ombi
+- 🎬 One-click movie requests when content isn't available
+- 🔐 Plex account authentication with 30-day session persistence
+- ⭐ Letterboxd community rating and your personal rating (stars + score)
+- 🎨 Dynamic accent color per film, with light/dark theme toggle
+- 🖥️ Requests route through your configured Overseerr or Ombi instance, which manages your Plex library
 
 ## 🛠 Setup
 
@@ -15,28 +18,32 @@
 2. Open Chrome and go to `chrome://extensions/`
 3. Enable **Developer Mode** (top right).
 4. Click **Load unpacked** and select the project folder.
-5. Click the extension icon, then **Settings** to add your servers.
+5. Click the extension icon, then **Settings** to configure your server.
 
-### 🧩 Overseerr Server Requirements
+### 🧩 Server Requirements
 
-To connect a server, you'll need:
+Choose either **Overseerr** or **Ombi** in settings.
 
-- The **URL** of your Overseerr instance (e.g., `https://requestsv2.jorn.co`)
-- A valid **API Key**
+**Overseerr (recommended):** Supports two auth methods:
+- **Plex login** — click *Sign in with Plex* in settings. Requests are attributed to your user account in Overseerr.
+- **API Key** — found in your Overseerr instance under **Settings** → **General** → **API Key**.
 
-#### Where to find your API key:
-1. Open your Overseerr web interface.
-2. Go to **Users** → select your user → **API Key**.
-3. Copy the key and paste it into the extension settings.
+**Ombi:** Supports the same two auth methods as Overseerr:
+- **Plex login** — automatically uses your connected Plex account (no extra setup needed once Plex is connected).
+- **API Key** — found in Ombi under **Settings** → **Configuration** → **API Key**.
 
 ## 📁 Project Structure
 
 ```
-├── popup.html       # Main popup UI
-├── popup.js         # Handles detection and server interaction
-├── settings.html    # Extension settings page
-├── settings.js      # Settings and storage logic
-├── style.css        # Shared styles
+├── manifest.json            # MV3 extension config
+├── background.js            # Service worker: Plex PIN OAuth polling
+├── content-script.js        # Extracts movie info from Letterboxd film pages
+├── popup.html / popup.js    # Main popup UI and availability logic
+├── settings.html / settings.js  # Server config, Plex auth UI
+├── plex-auth.js             # Plex PIN-based OAuth flow
+├── overseerr-integration.js # Overseerr API: search, availability, requests
+├── ombi-integration.js      # Ombi API: search, availability, requests
+├── style.css                # Shared styles (popup + settings)
 ```
 
 ## 📸 Screenshots
@@ -48,11 +55,11 @@ To connect a server, you'll need:
 
 The popup shows the Letterboxd community rating (stars + score), movie poster, release year, and genre tags. The accent color adapts dynamically to each film's title. A light/dark theme toggle is available in the top-right corner.
 
-## 🔐 Planned Features
+## 🗺️ Planned Features
 
-- 🔐 **JWT-based request attribution** (top priority)
+- 🖥️ Multiple server profiles — connect several Plex libraries, each with its own Overseerr or Ombi instance
 - 🌐 Support for more movie sites (beyond Letterboxd)
-- 🦊 Firefox version
+- 🦊 Firefox version *(in progress)*
 
 ## 📦 Releases
 
