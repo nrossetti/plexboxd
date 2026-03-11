@@ -51,7 +51,7 @@ Choose either **Overseerr** or **Ombi** in settings.
 | Available on Plex | Not Available | Already Requested |
 |:-:|:-:|:-:|
 | ![Available on Plex](screenshots/available.png) | ![Not Available](screenshots/not-available.png) | ![Processing Request](screenshots/processing-request.png) |
-| Movie is in the Plex library — **Watch on Plex** button links directly to playback. | Movie isn't available — **Request** button sends it to Overseerr with one click. | Request is already queued or processing in Overseerr. |
+| Movie is in the Plex library — **Watch on Plex** button links directly to the movie page. | Movie isn't available — **Request** button sends it to Overseerr with one click. | Request is already queued or processing in Overseerr. |
 
 The popup shows the Letterboxd community rating (stars + score), movie poster, release year, and genre tags. The accent color adapts dynamically to each film's title. A light/dark theme toggle is available in the top-right corner.
 

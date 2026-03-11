@@ -617,9 +617,9 @@ class OverseerrIntegration {
                     available: data.media?.status === 'available',
                     requested: data.status === 'approved' || data.status === 'pending',
                     approved: data.status === 'approved',
-                    plexUrl: data.media?.plexUrl || null
+                    plexUrl: data.media?.mediaUrl || data.media?.plexUrl || null
                 };
-                
+
                 console.log('✅ Availability check result:', result);
                 return result;
             } else if (response.status === 404) {
@@ -876,7 +876,7 @@ class OverseerrIntegration {
                     available: isAvailable,
                     requested: isRequested,
                     approved: isApproved,
-                    plexUrl: mediaInfo?.plexUrl || null,
+                    plexUrl: mediaInfo?.mediaUrl || mediaInfo?.plexUrl || null,
                     mediaInfo: mediaInfo // Include the full mediaInfo for debugging
                 }];
                 
@@ -1148,9 +1148,9 @@ class OverseerrIntegration {
             available: movieResult.media?.status === 'available',
             requested: movieResult.requested || movieResult.status === 'approved' || movieResult.status === 'pending',
             approved: movieResult.status === 'approved',
-            plexUrl: movieResult.media?.plexUrl || null
+            plexUrl: movieResult.media?.mediaUrl || movieResult.media?.plexUrl || null
         };
-        
+
         console.log('✅ Extracted availability:', result);
         return result;
     }

@@ -624,8 +624,8 @@ function displayResult(movieInfo, availability) {
                     const movie = availability.movie;
                     if (movie && movie.mediaInfo) {
                         const mediaInfo = movie.mediaInfo;
-                        if (mediaInfo.plexUrl) {
-                            plexUrl = mediaInfo.plexUrl;
+                        if (mediaInfo.mediaUrl || mediaInfo.plexUrl) {
+                            plexUrl = mediaInfo.mediaUrl || mediaInfo.plexUrl;
                             console.log('Using plexUrl from mediaInfo:', plexUrl);
                         } else if (mediaInfo.media && mediaInfo.media.length > 0) {
                             // Try to construct from the first media item
