@@ -1,16 +1,32 @@
 {
   "manifest_version": 3,
   "name": "PlexBoxd",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Check Plex server availability for movies on Letterboxd",
   "permissions": [
     "storage",
     "activeTab",
     "scripting",
-    "tabs"
+    "tabs",
+    "identity",
+    "windows",
+    "cookies"
   ],
   "host_permissions": [
-    "https://letterboxd.com/*"
+    "https://letterboxd.com/*",
+    "https://plex.tv/*",
+    "https://app.plex.tv/*",
+    "https://*.plex.tv/*",
+    "*://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://letterboxd.com/film/*"],
+      "js": ["content-script.js"]
+    }
   ],
   "action": {
     "default_popup": "popup.html",
@@ -24,5 +40,6 @@
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
-  }
+  },
+  "key": "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC12sGKWLkIYkVC2UeR/BOMXMcIzz6nTujv7rW9bgl8w9h2DqYtTt7bOwrywpdXuThev+kNnG7C+FTqoKXvnPNWFbYYKkXaMD3XM5unOEuPQ03fW44JFwx79egOnLkWJ/3LlSdz0Yvvsnq3X38k1GsjKnv97bI7xKmz8QZZtPbjHOGiNlGKwsLNYavMfDq9EjzrEXqFf4OBuANlSzc9u+j/jKOE37h2n5PHv0zlaIkXKcs8OPw82dXGBVuqhsrklLj1htBLu1BE2rjuCpS6G8QIa/sBthR2AIDwXO/MWQdkh4pxlsFfpeyGd398ShaE/TLyPHEufRFsR/lBup3sC5t1AgMBAAECggEAJrBZXBxHk1HK3++3cwawxvwnCQgEUZZvZro/loM+R/mnh+hScNG2hmgfimmdRpe8dyX3iEKHavnnoPoYC2v19hLM6IO31DVOtsW/P/pxUtOUEeiZxXPOn2G/4rnzg5PzAfijyddjINX1FyWdOGHrwDHF6s5CzMXof8SPoA6otsTehBxAyOiIRk8pJYNoPp07M7YF3wdPysmzUh0FUOy6uAVEq1/8pIVYMKSuYgIxHFwHS0uX8Ux0spBrYWSls1Qk2vahiAU8TFWhKhfkBqtrlg6Qng+R/v8ueBTNOepXpHdcumTODFjR5zwsUVkgvyRTQ5/LRISBBaKfxNTc1xmjEQKBgQDkZdu9EBZxp8XmGhdOz1ksR2Tlq2GWTv63htR62P0+n3Lz+M4Zc/uwtwdISkNdv1BSuMAcBMp3sSvO80K1oBHFO5XL6diMxq2AGeJXVCKemmNe6xk5RRmy5jhmHOlBxz0aYUJdk8Bb4p3ovSJSBUSMfkzQ5fet0KJB5DxLcvBChQKBgQDL1PIKRkZWdxvREXOg4g9Ftlj4LtgSVL3uM0HC//T6jWo+rRVQ4DRqKg3zXJyNuVVmEsjrg0ppS4DO8S9AQ7OxJxeR/xTZw2OVb77dcsMzu7l9ZonVWLICTas0PBjwJWiQcpGIR/s+mAPYYttLCYuYM4QgKRdwd5kKNutqDblgMQKBgHGzy6rZgXLfZQPiZUwUqX4DpNU5doGPnfrbopftwlUUp/ORH3lIZjpZQ8TXQ6Y+AczMsMbCE9F2YCrMq58jqvUXbsFvDyE2H1WwjR+QgROYJHQycgIyxlJrjhQ3vF/EwkSJurI/Rfn4XUhqL9XJTZDrp24vrhfXz48iAmpFNBrJAoGADYkWiZghE5zVPAzsoMJiQT7aqaByuMTn1+mPdGOK4RiC9aaIw9YfpO0mAAMmYkLsaNrWfM07I8Lfyt45RQs544m1BvzpZYyUEFhbVFlKnSTaLHmirYg2SfDebZmQDmJtjyoMgABHruBpYPUvmswHeRPysjAIXm+Suhrrhx9iMAECgYBS7rroxGMm9n2YpTrTg8UGLr7TUAd9RcuyzRFjWoNWyEILqjw9hjOuI2LEANxZJ2qg+8uf2/Ga0fL/KTEbF3xqoc7g8GbGp1G+lvwlhpJ2vUad08qCGv2oBpDDlCIn6J1A5IuPVUQEoOBugtw0Q8wouy/KCCVI5k6OMVQL0nA0/Q=="
 } 

@@ -1,11 +1,11 @@
 # PlexBoxd
 
-**PlexBoxd** is a Chrome extension that makes it effortless to check if a movie you're browsing on [Letterboxd](https://letterboxd.com) is available on any of your Plex servers (via Ombi) — and lets you request it with a single click if it's not.
+**PlexBoxd** is a Chrome extension that makes it effortless to check if a movie you're browsing on [Letterboxd](https://letterboxd.com) is available on any of your Plex servers (via Overseerr) — and lets you request it with a single click if it's not.
 
 ## 🚀 Features
 
 - 🔍 Detects when you're viewing a film on Letterboxd
-- ⚡ Instantly checks all your configured Ombi servers
+- ⚡ Instantly checks all your configured Overseerr servers
 - 🎬 One-click movie requests when content isn’t available
 - 🖥️ Works with multiple servers (great for shared libraries)
 
@@ -17,16 +17,16 @@
 4. Click **Load unpacked** and select the project folder.
 5. Click the extension icon, then **Settings** to add your servers.
 
-### 🧩 Ombi Server Requirements
+### 🧩 Overseerr Server Requirements
 
 To connect a server, you'll need:
 
-- The **URL** of your Ombi instance (e.g., `http://localhost:5000`)
+- The **URL** of your Overseerr instance (e.g., `https://requestsv2.jorn.co`)
 - A valid **API Key**
 
 #### Where to find your API key:
-1. Open your Ombi web interface.
-2. Click your user icon (top right) → **API Key**.
+1. Open your Overseerr web interface.
+2. Go to **Users** → select your user → **API Key**.
 3. Copy the key and paste it into the extension settings.
 
 ## 📁 Project Structure

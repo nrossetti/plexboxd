@@ -10,14 +10,95 @@
         <h1 class="settings-title">PlexBoxd Settings</h1>
 
         <div class="settings-section">
-            <div class="section-header">
-                <h2>Configured Servers</h2>
-                <button id="addServer" class="button button-primary">
-                    <i class="fas fa-plus"></i> Add Server
-                </button>
+            <h2>Plex Account</h2>
+            <div id="plexAuthStatus" class="plex-auth-status">
+                <div class="not-authenticated">
+                    <p>Not connected to Plex</p>
+                    <button id="plexLogin" class="button button-primary">
+                        <i class="fas fa-sign-in-alt"></i> Connect to Plex
+                    </button>
+                </div>
+                <div class="authenticated" style="display: none;">
+                    <div class="user-info">
+                        <img id="plexUserAvatar" class="avatar" src="" alt="User avatar">
+                        <span id="plexUsername"></span>
+                    </div>
+                    <button id="plexLogout" class="button button-secondary">
+                        <i class="fas fa-sign-out-alt"></i> Disconnect
+                    </button>
+                </div>
             </div>
-            <div id="serverList" class="server-list">
-                <!-- Server items will be added here dynamically -->
+        </div>
+
+        <div class="settings-section">
+            <h2>Request Server Configuration</h2>
+            
+            <div class="form-group">
+                <label>Server Type</label>
+                <select id="serverType" class="form-control">
+                    <option value="overseerr">Overseerr</option>
+                    <option value="ombi">Ombi</option>
+                </select>
+                <div class="form-description">
+                    Choose which request server to use
+                </div>
+            </div>
+            
+            <!-- Overseerr Configuration -->
+            <div id="overseerrConfig" class="server-config">
+                <h3>Overseerr Server</h3>
+                <div class="form-group">
+                    <label>Overseerr Server URL</label>
+                    <input type="url" id="overseerrUrl" placeholder="e.g., https://example-overseerr-server.com" />
+                    <div class="form-description">
+                        Enter your Overseerr server URL
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="overseerrApiKey">Overseerr API Key</label>
+                    <input type="text" id="overseerrApiKey" class="form-control" placeholder="Enter your Overseerr API key">
+                    <small class="form-text">Found in Overseerr settings → Users → Your User → API Key</small>
+                </div>
+                <div class="connection-status" id="overseerrConnectionStatus">
+                    Not connected
+                </div>
+                <button id="testOverseerrConnection" class="btn btn-primary">
+                    Test Connection (Using API Key)
+                </button>
+                <button id="testOverseerrPlexConnection" class="btn btn-secondary">
+                    Test Connection (Using Plex User)
+                </button>
+                <div class="form-group" style="margin-top: 10px;">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="rememberOverseerrSession" checked>
+                        Remember me for 30 days
+                    </label>
+                    <small class="form-text">If unchecked, your Overseerr session will not be persisted across browser restarts.</small>
+                </div>
+                <div id="overseerrPlexUserInfo" class="user-info" style="display:none; margin-top:10px;"></div>
+            </div>
+            
+            <!-- Ombi Configuration -->
+            <div id="ombiConfig" class="server-config" style="display: none;">
+                <h3>Ombi Server</h3>
+                <div class="form-group">
+                    <label>Ombi Server URL</label>
+                    <input type="url" id="ombiUrl" placeholder="e.g., https://ombi.jorn.co" />
+                    <div class="form-description">
+                        Enter your Ombi server URL
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="ombiApiKey">Ombi API Key</label>
+                    <input type="text" id="ombiApiKey" class="form-control" placeholder="Enter your Ombi API key">
+                    <small class="form-text">Found in Ombi settings → Configuration → API Key</small>
+                </div>
+                <div class="connection-status" id="ombiConnectionStatus">
+                    Not connected
+                </div>
+                <button id="testOmbiConnection" class="btn btn-primary">
+                    Test Connection (Using API Key)
+                </button>
             </div>
         </div>
 
@@ -54,6 +135,9 @@
 
     <div id="toast" class="toast"></div>
     <script src="Sortable.min.js"></script>
+    <script src="plex-auth.js"></script>
+    <script src="overseerr-integration.js"></script>
+    <script src="ombi-integration.js"></script>
     <script src="settings.js"></script>
 </body>
 </html> 
